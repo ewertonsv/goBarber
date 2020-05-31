@@ -1,21 +1,37 @@
 import Sequelize from 'sequelize';
+import mongoose from 'mongoose';
 
 import User from '../app/models/User';
+import File from '../app/models/File';
+import Appointment from '../app/models/Appointment';
 
 import databaseConfig from '../config/database';
 
-const models = [User]; // array que deve ter todos os models
+const models = [User, File, Appointment]; // array que deve ter todos os models
 
 class Database {
   constructor() {
     this.init();
+    this.mongo();
   }
 
   init() {
     this.connection = new Sequelize(databaseConfig); // criação da conexão
 
     // passagem do parâmetro da conexão para cada model do array
-    models.map((model) => model.init(this.connection));
+    models
+      .map((model) => model.init(this.connection))
+      .map(
+        (model) => model.associate && model.associate(this.connection.models)
+      );
+  }
+
+  mongo() {
+    this.mongoConnection = mongoose.connect(
+      'mongodb://192.168.99.100:27017/gobarber',
+      // { useNewUrlParser: true, useFindAndModify: true }
+      { useNewUrlParser: true, useUnifiedTopology: true }
+    );
   }
 }
 

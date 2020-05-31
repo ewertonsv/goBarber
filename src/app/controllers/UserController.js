@@ -51,18 +51,23 @@ class UserController {
 
     const user = await User.findByPk(req.userId);
 
+    // testa se o email vai ser alterado
     if (email !== user.email) {
+      // faz uma busca para checar se já existe um usuário com o novo email
       const userExists = await User.findOne({ where: { email } });
 
+      // se já houver usuário com o email
       if (userExists) {
         return res.status(400).json({ error: 'User already exists. ' });
       }
     }
 
+    // teste se a senha antiga foi digitada e se está errada
     if (oldPassword && !(await user.checkPassword(oldPassword))) {
       return res.status(401).json({ error: 'Password does not match' });
     }
 
+    // preenche o banco com os dados informados e retorna alguns dados
     const { id, name, provider } = await user.update(req.body);
 
     return res.json({
